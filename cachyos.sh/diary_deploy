@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+set -e
+
+echo "同步原始日记仓库"
+DAIRY_RAW_DIR="$HOME/diary_post/dairy/"
+cd "$DAIRY_RAW_DIR" || { echo "❌ 无法进入目录：$DAIRY_RAW_DIR"; exit 1; }
+git add .
+git commit -m "Update diary: $(date '+%Y-%m-%d %H:%M:%S')" || true
+git push
+
+echo "加密日记自动更新和部署"
+
+STATUS_LOG=""
+WEBSITE_DIR="$HOME/diary_post/dairy_website/"
+
+cd "$WEBSITE_DIR" || { echo "❌ 无法进入目录：$WEBSITE_DIR"; exit 1; }
+
+git submodule update --remote --merge
+
+if node scripts/encrypt-diaries.js; then
+    echo "✅ 日记加密完成"
+    STATUS_LOG="${STATUS_LOG}✅ 日记加密\n"
+else
+    echo "❌ 加密失败"
+    exit 1
+fi
+
+if [ -n "$(git status --porcelain)" ]; then
+    git add .
+    git commit -m "更新加密日记 - $(date '+%Y-%m-%d %H:%M:%S')"
+    echo "🚀 推送到 GitHub..."
+    git push origin main
+    STATUS_LOG="${STATUS_LOG}✅ 推送到 GitHub\n"
+else
+    echo "✅ 网站内容已是最新，无需推送"
+    STATUS_LOG="${STATUS_LOG}ℹ️ 无文件变化\n"
+fi

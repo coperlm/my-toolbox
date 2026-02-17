@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+cd /home/coper/blog_butterfly/
+hexo clean
+python tools/generate_category_stats.py
+git add .
+git commit -m "Update blog content"
+git push
+hexo generate
+hexo deploy
+hexo clean
+
+if [ $? -eq 0 ]; then
+  echo "Blog deployed successfully!"
+else
+  echo "Hexo deploy failed!"
+fi

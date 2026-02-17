@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+
+# ==========================================
+# 自动提权模块
+# ==========================================
+# 检查是否为 Root 用户，如果不是则自动请求密码
+if [ "$EUID" -ne 0 ]; then
+    echo "🔒 需要管理员权限来重置硬件，请输入密码..."
+    exec sudo "$0" "$@"
+fi
+
+echo "🚀 开始执行触控板全方位修复..."
+
+# ==========================================
+# 第一步：底层硬件复位 (针对 Intel I2C 控制器)
+# ==========================================
+echo -e "\n>> [1/2] 正在重置 I2C/PCI 控制器..."
+
+# 定义可能的驱动路径
+DRIVER_PATH="/sys/bus/pci/drivers/intel-lpss"
+DEVICE_ID="0000:00:15.1"
+
+# 检查路径，如果默认路径不存在，尝试备用路径
+if [ ! -d "$DRIVER_PATH" ]; then
+    DRIVER_PATH="/sys/bus/pci/drivers/i2c_designware_pci"
+fi
+
+if [ -d "$DRIVER_PATH" ]; then
+    # 尝试解绑并重新绑定设备
+    if [ -e "$DRIVER_PATH/unbind" ]; then
+        echo -n "$DEVICE_ID" > "$DRIVER_PATH/unbind" 2>/dev/null
+        echo "   - 已解绑控制器"
+    fi
+
+    sleep 1
+
+    if [ -e "$DRIVER_PATH/bind" ]; then
+        echo -n "$DEVICE_ID" > "$DRIVER_PATH/bind" 2>/dev/null
+        echo "   - 已重新绑定控制器"
+    fi
+    echo "✅ 硬件控制器重置尝试完成。"
+else
+    echo "⚠️  未找到指定的 I2C 控制器路径，跳过硬件重置步骤。"
+fi
+
+# ==========================================
+# 第二步：软件驱动重载 (通用驱动)
+# ==========================================
+echo -e "\n>> [2/2] 正在重载输入驱动模块..."
+
+# 移除模块 (抑制错误输出，因为可能并未加载)
+# 注意：因为脚本已在 Root 下运行，无需再加 sudo
+modprobe -r i2c_hid_acpi 2>/dev/null
+modprobe -r i2c_hid 2>/dev/null
+modprobe -r psmouse 2>/dev/null
+
+echo "   - 旧驱动已卸载，等待硬件稳定..."
+sleep 1
+
+# 重新加载模块
+# 优先加载现代 I2C 驱动
+if modprobe i2c_hid_acpi 2>/dev/null; then
+    echo "   - i2c_hid_acpi 加载成功"
+elif modprobe i2c_hid 2>/dev/null; then
+    echo "   - i2c_hid 加载成功"
+fi
+
+# 加载传统 PS/2 驱动 (作为兼容性补充)
+modprobe psmouse 2>/dev/null && echo "   - psmouse 加载成功"
+
+# ==========================================
+# 结束
+# ==========================================
+echo -e "\n🎉 所有修复步骤执行完毕！"

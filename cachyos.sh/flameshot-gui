@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+# 1. 强制指定 Wayland 平台（解决 KDE 下无反应/黑屏）
+export QT_QPA_PLATFORM=wayland
+
+# 2. 确保没有残留的后台进程（解决“正在运行”导致的失效）
+pkill -x flameshot > /dev/null 2>&1
+
+# 3. 启动截图
+/usr/bin/flameshot gui
