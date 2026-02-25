@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+# 进入指定的目录
+cd /home/coper/KnowledgeBase/ || exit 1
+
+# 获取当前时间，格式例如：2026-02-25 06:00:58
+CURRENT_TIME=$(date +"%Y-%m-%d %H:%M:%S")
+
+# 执行 git 操作
+git add .
+# 将时间变量拼接到 commit 信息中
+git commit -m "Auto Commit: ${CURRENT_TIME}"
+git push
+
+# 部署 MkDocs
+mkdocs gh-deploy
