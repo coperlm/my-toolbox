@@ -2,7 +2,7 @@
 
 #遇错即停。任何一行报错，脚本立即停止，不再盲目执行后续命令
 set -e
-BLOG_DIR="/home/coper/blog_butterfly/"
+BLOG_DIR="/home/coper/Websites/blog_butterfly/"
 cd "$BLOG_DIR"
 
 hexo clean

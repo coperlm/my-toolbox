@@ -3,7 +3,7 @@
 set -e
 
 echo "同步原始日记仓库"
-DAIRY_RAW_DIR="$HOME/diary_post/dairy/"
+DAIRY_RAW_DIR="/home/coper/Websites//diary_post/dairy/"
 cd "$DAIRY_RAW_DIR" || { echo "❌ 无法进入目录：$DAIRY_RAW_DIR"; exit 1; }
 git add .
 git commit -m "Update diary: $(date '+%Y-%m-%d %H:%M:%S')" || true
@@ -12,7 +12,7 @@ git push
 echo "加密日记自动更新和部署"
 
 STATUS_LOG=""
-WEBSITE_DIR="$HOME/diary_post/dairy_website/"
+WEBSITE_DIR="/home/coper/Websites/diary_post/dairy_website/"
 
 cd "$WEBSITE_DIR" || { echo "❌ 无法进入目录：$WEBSITE_DIR"; exit 1; }
 
