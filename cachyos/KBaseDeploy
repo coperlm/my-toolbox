@@ -9,7 +9,7 @@ CURRENT_TIME=$(date +"%Y-%m-%d %H:%M:%S")
 # 执行 git 操作
 git add .
 # 将时间变量拼接到 commit 信息中
-git commit -m "Auto Commit: ${CURRENT_TIME}"
+git commit -m "${CURRENT_TIME}|AutoCommit"
 git push
 
 # 部署 MkDocs
